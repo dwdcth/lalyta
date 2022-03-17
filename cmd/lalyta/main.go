@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -27,6 +28,14 @@ func run() error {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+
+	// workDir, _ := os.Getwd()
+	// filesDir := http.Dir(filepath.Join(workDir, "static"))
+	// FileServer(r, "/favicon", filesDir)
+	r.Get("/", api.FrontPage())
+	r.Get("/favicon.ico", api.FaviconHandler())
+	r.Get("/favicon.ico/", api.FaviconHandler())
+
 	r.Get("/info", api.Info("PL", "Hello World!", "1.1.13"))
 	r.Post("/bookmarks", api.CreateBookmarks(buntStorage))
 	r.Get("/bookmarks/{id}", api.Bookmarks(buntStorage, chiParams))
@@ -34,12 +43,36 @@ func run() error {
 	r.Get("/bookmarks/{id}/lastUpdated", api.LastUpdated(buntStorage, chiParams))
 	r.Get("/bookmarks/{id}/version", api.Version(buntStorage, chiParams))
 
-	log.Println("Starting server at 0.0.0.0:8080")
-	return http.ListenAndServe("0.0.0.0:8080", r)
+	LoadConfig()
+	port := fmt.Sprintf(":%d", AppConfig.Server.Port)
+	log.Println("Starting server at 0.0.0.0" + port)
+
+	return http.ListenAndServe("0.0.0.0"+port, r)
 }
 
 func main() {
 	if err := run(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// FileServer conveniently sets up a http.FileServer handler to serve
+// static files from a http.FileSystem.
+func FileServer(r chi.Router, path string, root http.FileSystem) {
+	// if strings.ContainsAny(path, "{}*") {
+	// 	panic("FileServer does not permit any URL parameters.")
+	// }
+
+	// if path != "/" && path[len(path)-1] != '/' {
+	// 	r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+	// 	path += "/"
+	// }
+	// path += "*"
+
+	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
+		rctx := chi.RouteContext(r.Context())
+		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
+		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
+		fs.ServeHTTP(w, r)
+	})
 }

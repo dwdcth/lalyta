@@ -18,6 +18,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"path/filepath"
+	"text/template"
 	"time"
 
 	"github.com/alioygur/gores"
@@ -25,6 +27,25 @@ import (
 	"github.com/thinkofher/lalyta/pkg/models"
 	"github.com/thinkofher/lalyta/pkg/service/gen"
 )
+
+// front html
+func FrontPage() http.HandlerFunc {
+
+	t := template.New("frontpage")
+	t, _ = t.Parse(frontpageHTML)
+
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Execute(w, nil)
+	})
+}
+
+func FaviconHandler() http.HandlerFunc {
+	// workDir, _ := os.Getwd()
+	filesDir := filepath.Join(".", "static", "favicon.ico")
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, string(filesDir))
+	})
+}
 
 // Info retrieves information describing the xBrowserSync service.
 //
