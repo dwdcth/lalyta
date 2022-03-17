@@ -16,7 +16,7 @@ import (
 )
 
 func run() error {
-	bunt, err := buntdb.Open("lalyta.db")
+	bunt, err := buntdb.Open(AppConfig.Bolt.StorageFile)
 	if err != nil {
 		return fmt.Errorf("buntdb.Open: %w", err)
 	}
@@ -35,15 +35,14 @@ func run() error {
 	r.Get("/", api.FrontPage())
 	r.Get("/favicon.ico", api.FaviconHandler())
 	r.Get("/favicon.ico/", api.FaviconHandler())
-
-	r.Get("/info", api.Info("PL", "Hello World!", "1.1.13"))
+	maxSyncSize := int64(AppConfig.Server.MaxSyncSizeKb * 1024)
+	r.Get("/info", api.Info(maxSyncSize, "PL", "Hello World!", "1.1.13"))
 	r.Post("/bookmarks", api.CreateBookmarks(buntStorage))
 	r.Get("/bookmarks/{id}", api.Bookmarks(buntStorage, chiParams))
 	r.Put("/bookmarks/{id}", api.UpdateBookmarks(buntStorage, chiParams))
 	r.Get("/bookmarks/{id}/lastUpdated", api.LastUpdated(buntStorage, chiParams))
 	r.Get("/bookmarks/{id}/version", api.Version(buntStorage, chiParams))
 
-	LoadConfig()
 	port := fmt.Sprintf(":%d", AppConfig.Server.Port)
 	log.Println("Starting server at 0.0.0.0" + port)
 
@@ -51,6 +50,7 @@ func run() error {
 }
 
 func main() {
+	LoadConfig()
 	if err := run(); err != nil {
 		log.Fatal(err)
 	}

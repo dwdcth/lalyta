@@ -3,8 +3,8 @@
 [server]
 service_message = "Hello from [github.com/ishani/xSyn], the compact Go server for xBrowserSync"
 release_mode = true             # XS_SRV_RELEASE     # run Gin in release mode, hiding all debug and verbose logging
-max_sync_size_kb = 500          # XS_SRV_MAXSYNC     # maximum amount of data to allow per SyncID (remember it comes in compressed, so 500kb is _a lot_ of bookmarks)
-port = 80                       # XS_SRV_PORT        # port to serve on;
+max_sync_size_kb = 1000          # XS_SRV_MAXSYNC     # maximum amount of data to allow per SyncID (remember it comes in compressed, so 500kb is _a lot_ of bookmarks)
+port = 8003                       # XS_SRV_PORT        # port to serve on;
                                                      # NOTE: ..unless in Lets Encrypt mode, in which case both :80 and :443 are used and cannot be overridden
 status_route = "/stat"          # XS_SRV_STATUS      # route that shows more comprehensive server stats; obfuscate this if you like
 

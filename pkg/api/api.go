@@ -69,7 +69,7 @@ func FaviconHandler() http.HandlerFunc {
 //
 // * Maximum sync size ("maxSyncSize", int): maximum sync size (in bytes)
 // allowed by the service.
-func Info(location, msg, version string) http.HandlerFunc {
+func Info(maxSyncSize int64, location, msg, version string) http.HandlerFunc {
 	type response struct {
 		MaxSyncSize int64  `json:"maxSyncSize"`
 		Message     string `json:"message"`
@@ -78,7 +78,7 @@ func Info(location, msg, version string) http.HandlerFunc {
 	}
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		gores.JSON(w, http.StatusOK, &response{
-			MaxSyncSize: 204800,
+			MaxSyncSize: maxSyncSize,
 			Message:     msg,
 			Status:      1,
 			Version:     version,
